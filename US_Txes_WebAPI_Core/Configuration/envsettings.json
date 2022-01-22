@@ -1,0 +1,4 @@
+{
+  "logFilePath": "D:\\Logs",
+  "dbConnectionString": "Data Source=.;Initial Catalog=USDb;Integrated Security=True"
+}
