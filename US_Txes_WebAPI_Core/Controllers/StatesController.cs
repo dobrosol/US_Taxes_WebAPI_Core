@@ -11,12 +11,16 @@ namespace US_Txes_WebAPI_Core.Controllers
     [ApiController]
     public class StatesController : ControllerBase
     {
-        private readonly IDbRepository<State> _statesRepository;
-        private readonly IDbRepository<ZipCode> _zipCodesRepository;
-        public StatesController(IDbRepository<State> statesRepository, IDbRepository<ZipCode> zipCodesRepository)
+        private readonly IDbEntityRepository<State> _statesRepository;
+        private readonly IDbEntityRepository<ZipCode> _zipCodesRepository;
+        private readonly IDbEntityRepository<VehicleFee> _vehicleFeesRepository;
+        public StatesController(IDbEntityRepository<State> statesRepository
+            , IDbEntityRepository<ZipCode> zipCodesRepository
+            , IDbEntityRepository<VehicleFee> vehicleFeesRepository)
         {
             _statesRepository = statesRepository;
             _zipCodesRepository = zipCodesRepository;
+            _vehicleFeesRepository = vehicleFeesRepository;
         }
 
         [HttpGet]
@@ -116,7 +120,13 @@ namespace US_Txes_WebAPI_Core.Controllers
             var associatedZipCodes = await _zipCodesRepository.GetAllEntitiesByParentID(id);
             if (associatedZipCodes.IsAny())
             {
-                return Problem("Cannot remove state with specified id. It contains at least 1 associated ZipCode.");
+                return Problem("Cannot remove State with specified id. It contains at least 1 associated ZipCode.");
+            }
+
+            var associatedVehicleFees = await _vehicleFeesRepository.GetAllEntitiesByParentID(id);
+            if (associatedVehicleFees.IsAny())
+            {
+                return Problem("Cannot remove State with specified id. It contains at least 1 associated VehicleFee.");
             }
 
             var isDeleted = await _statesRepository.DeleteByID(id);

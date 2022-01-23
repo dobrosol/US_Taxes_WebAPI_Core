@@ -1,17 +1,13 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using US_Txes_WebAPI_Core.DbModels;
 using US_Txes_WebAPI_Core.DbRepositories;
 using US_Txes_WebAPI_Core.Extensions;
@@ -33,20 +29,28 @@ namespace US_Txes_WebAPI_Core
 
         public void ConfigureServices(IServiceCollection services)
         {
+            //Db connection
             var dbConnString = appConfiguration["dbConnectionString"];
             services.AddDbContext<CustomDbContext>(options => options.
                    UseSqlServer(dbConnString));
 
-            services.AddTransient<IDbRepository<State>, StatesRepository>();
-            services.AddTransient<IDbRepository<ZipCode>, ZipCodesRepository>();
+            //Dependency injections - repositories
+            services.AddTransient<IDbEntityRepository<State>, StatesRepository>();
+            services.AddTransient<IDbEntityRepository<ZipCode>, ZipCodesRepository>();
+            services.AddTransient<IDbEntityRepository<Fee>, FeesRepository>();
+            services.AddTransient<IDbEntityRepository<VehicleFee>, VehicleFeesRepository>();
+            services.AddTransient<ITaxesRepository, TaxesRepository>();
+            services.AddTransient<IHelperRepository, HelperRepository>();
+
+            //To avoid errors with json cycle dependencies
             services.AddControllers().AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
             services.AddLogging();
 
+            //Automapper config
             var mappingConfig = new MapperConfiguration(mc =>
             {
                 mc.AddProfile(new MappingProfile());
             });
-
             IMapper mapper = mappingConfig.CreateMapper();
             services.AddSingleton(mapper);
         }
@@ -58,14 +62,17 @@ namespace US_Txes_WebAPI_Core
             {
                 app.UseDeveloperExceptionPage();
             }
-            app.UseMiddleware<RequestResponseMiddleware>();
-            app.UseRouting();
 
+            //Request and Response logging
+            app.UseMiddleware<RequestResponseMiddleware>();
+
+            app.UseRouting();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
 
+            //Connection custom logger
             var logFilePath = appConfiguration["logFilePath"];
             if (string.IsNullOrEmpty(logFilePath))
             {

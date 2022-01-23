@@ -13,6 +13,12 @@ namespace US_Txes_WebAPI_Core.Mappings
 
             CreateMap<ZipCodeDb, ZipCode>();
             CreateMap<ZipCode, ZipCodeDb>();
+
+            CreateMap<FeeDb, Fee>();
+            CreateMap<Fee, FeeDb>();
+
+            CreateMap<VehicleFeeDb, VehicleFee>();
+            CreateMap<VehicleFee, VehicleFeeDb>();
         }
     }
 }

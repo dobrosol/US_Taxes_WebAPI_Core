@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace US_Txes_WebAPI_Core.DbRepositories
 {
-    public interface IDbRepository<T>
+    public interface IDbEntityRepository<T>
     {
         public Task<IEnumerable<T>> GetAllEntities();
 

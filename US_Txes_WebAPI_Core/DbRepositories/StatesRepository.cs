@@ -8,7 +8,7 @@ using US_Txes_WebAPI_Core.Models;
 
 namespace US_Txes_WebAPI_Core.DbRepositories
 {
-    public class StatesRepository : IDbRepository<State>
+    public class StatesRepository : IDbEntityRepository<State>
     {
         private readonly CustomDbContext _db;
         private readonly IMapper _mapper;
@@ -25,7 +25,7 @@ namespace US_Txes_WebAPI_Core.DbRepositories
 
             var resultID = await _db.SaveChangesAsync();
 
-            var knowEntity = await _db.States.Include(s => s.ZipCodes).FirstOrDefaultAsync(s => s.StateID == stateDb.Entity.StateID);
+            var knowEntity = await _db.States.Include(s => s.VehicleFees).Include(s => s.ZipCodes).ThenInclude(zc => zc.Fee).FirstOrDefaultAsync(s => s.StateID == stateDb.Entity.StateID);
 
             return _mapper.Map<StateDb, State>(knowEntity);
         }
@@ -48,14 +48,14 @@ namespace US_Txes_WebAPI_Core.DbRepositories
 
         public async Task<State> FindByID(int id)
         {
-            var stateDb = await _db.States.Include(s => s.ZipCodes).FirstOrDefaultAsync(s => s.StateID == id);
+            var stateDb = await _db.States.Include(s => s.VehicleFees).Include(s => s.ZipCodes).ThenInclude(zc => zc.Fee).FirstOrDefaultAsync(s => s.StateID == id);
 
             return _mapper.Map<StateDb, State>(stateDb);
         }
 
         public async Task<IEnumerable<State>> GetAllEntities()
         {
-            var statesDb = await _db.States.Include(s => s.ZipCodes).ToListAsync();
+            var statesDb = await _db.States.Include(s => s.VehicleFees).Include(s => s.ZipCodes).ThenInclude(zc => zc.Fee).Include(s => s.VehicleFees).ToListAsync();
 
             return _mapper.Map<IEnumerable<StateDb>, IEnumerable<State>>(statesDb);
         }
@@ -74,7 +74,7 @@ namespace US_Txes_WebAPI_Core.DbRepositories
 
         public async Task<State> Update(State entity)
         {
-            var knowEntity = await _db.States.Include(s => s.ZipCodes).FirstOrDefaultAsync(s => s.StateID == entity.StateID);
+            var knowEntity = await _db.States.Include(s => s.VehicleFees).Include(s => s.ZipCodes.Select(zc => zc.Fee)).Include(s => s.VehicleFees).FirstOrDefaultAsync(s => s.StateID == entity.StateID);
 
             knowEntity.Name = entity.Name;
             knowEntity.Abbreviation = entity.Abbreviation;

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace US_Txes_WebAPI_Core.DbModels
@@ -12,5 +13,7 @@ namespace US_Txes_WebAPI_Core.DbModels
         [ForeignKey("State")]
         public int StateID { get; set; }
         public StateDb State { get; set; }
+
+        public FeeDb Fee { get; set; }
     }
 }

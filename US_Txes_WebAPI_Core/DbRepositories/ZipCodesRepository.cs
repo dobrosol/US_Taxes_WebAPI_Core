@@ -8,7 +8,7 @@ using US_Txes_WebAPI_Core.Models;
 
 namespace US_Txes_WebAPI_Core.DbRepositories
 {
-    public class ZipCodesRepository : IDbRepository<ZipCode>
+    public class ZipCodesRepository : IDbEntityRepository<ZipCode>
     {
         private readonly CustomDbContext _db;
         private readonly IMapper _mapper;
@@ -25,7 +25,7 @@ namespace US_Txes_WebAPI_Core.DbRepositories
 
             var resultID = await _db.SaveChangesAsync();
 
-            var knowEntity = await _db.ZipCodes.Include(zc => zc.State).FirstOrDefaultAsync(s => s.ZipCodeID == zipCodeDb.Entity.ZipCodeID);
+            var knowEntity = await _db.ZipCodes.Include(zc => zc.State).Include(zc => zc.Fee).FirstOrDefaultAsync(s => s.ZipCodeID == zipCodeDb.Entity.ZipCodeID);
 
             return _mapper.Map<ZipCodeDb, ZipCode>(knowEntity);
         }
@@ -48,14 +48,14 @@ namespace US_Txes_WebAPI_Core.DbRepositories
 
         public async Task<ZipCode> FindByID(int id)
         {
-            var zipCodeDb = await _db.ZipCodes.Include(zc => zc.State).FirstOrDefaultAsync(s => s.ZipCodeID == id);
+            var zipCodeDb = await _db.ZipCodes.Include(zc => zc.State).Include(zc => zc.Fee).FirstOrDefaultAsync(s => s.ZipCodeID == id);
 
             return _mapper.Map<ZipCodeDb, ZipCode>(zipCodeDb);
         }
 
         public async Task<IEnumerable<ZipCode>> GetAllEntities()
         {
-            var zipCodeDb = await _db.ZipCodes.Include(zc => zc.State).ToListAsync();
+            var zipCodeDb = await _db.ZipCodes.Include(zc => zc.State).Include(zc => zc.Fee).ToListAsync();
 
             return _mapper.Map<IEnumerable<ZipCodeDb>, IEnumerable<ZipCode>>(zipCodeDb);
         }
@@ -76,7 +76,7 @@ namespace US_Txes_WebAPI_Core.DbRepositories
 
         public async Task<ZipCode> Update(ZipCode entity)
         {
-            var knowEntity = await _db.ZipCodes.Include(zc => zc.State).FirstOrDefaultAsync(s => s.ZipCodeID == entity.ZipCodeID);
+            var knowEntity = await _db.ZipCodes.Include(zc => zc.State).Include(zc => zc.Fee).FirstOrDefaultAsync(s => s.ZipCodeID == entity.ZipCodeID);
 
             knowEntity.Value = entity.Value;
             knowEntity.StateID = entity.StateID;

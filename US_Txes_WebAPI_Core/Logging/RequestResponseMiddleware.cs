@@ -20,7 +20,7 @@ namespace US_Txes_WebAPI_Core.Logging
         public async Task Invoke(HttpContext context)
         {
             await LogRequest(context);
-            //await _next(context);
+
             await LogResponse(context);
         }
 
@@ -28,6 +28,7 @@ namespace US_Txes_WebAPI_Core.Logging
         {
             context.Request.EnableBuffering();
             var originalRequestBody = context.Request.Body;
+
             originalRequestBody.Seek(0, SeekOrigin.Begin);
             string requestBody = await new StreamReader(originalRequestBody).ReadToEndAsync();
             originalRequestBody.Seek(0, SeekOrigin.Begin);
@@ -50,10 +51,13 @@ namespace US_Txes_WebAPI_Core.Logging
             {
                 var originalResponseBody = context.Response.Body;
                 context.Response.Body = stream;
+
                 await _next(context);
+
                 stream.Seek(0, SeekOrigin.Begin);
                 responseBody = await new StreamReader(stream).ReadToEndAsync();
                 stream.Seek(0, SeekOrigin.Begin);
+
                 await stream.CopyToAsync(originalResponseBody);
                 context.Response.Body = originalResponseBody;
             }

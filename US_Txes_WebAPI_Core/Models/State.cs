@@ -13,5 +13,7 @@ namespace US_Txes_WebAPI_Core.Models
         public string Name { get; set; }
 
         public IEnumerable<ZipCode> ZipCodes { get; set; }
+
+        public IEnumerable<VehicleFee> VehicleFees { get; set; }
     }
 }

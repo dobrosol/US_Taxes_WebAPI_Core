@@ -11,5 +11,7 @@ namespace US_Txes_WebAPI_Core.DbModels
         public string Name { get; set; }
 
         public ICollection<ZipCodeDb> ZipCodes { get; set; }
+
+        public ICollection<VehicleFeeDb> VehicleFees { get; set; }
     }
 }

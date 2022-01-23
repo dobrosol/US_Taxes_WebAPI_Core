@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using US_Txes_WebAPI_Core.DbRepositories;
+using US_Txes_WebAPI_Core.Extensions;
 using US_Txes_WebAPI_Core.Models;
 
 namespace US_Txes_WebAPI_Core.Controllers
@@ -10,12 +11,16 @@ namespace US_Txes_WebAPI_Core.Controllers
     [ApiController]
     public class ZipCodesController : ControllerBase
     {
-        private readonly IDbRepository<ZipCode> _zipCodesRepository;
-        private readonly IDbRepository<State> _statesRepository;
-        public ZipCodesController(IDbRepository<ZipCode> zipCodesRepository, IDbRepository<State> statesRepository)
+        private readonly IDbEntityRepository<ZipCode> _zipCodesRepository;
+        private readonly IDbEntityRepository<State> _statesRepository;
+        private readonly IDbEntityRepository<Fee> _feesRepository;
+        public ZipCodesController(IDbEntityRepository<ZipCode> zipCodesRepository
+            , IDbEntityRepository<State> statesRepository
+            , IDbEntityRepository<Fee> feesRepository)
         {
             _zipCodesRepository = zipCodesRepository;
             _statesRepository = statesRepository;
+            _feesRepository = feesRepository;
         }
 
         [HttpGet]
@@ -80,18 +85,18 @@ namespace US_Txes_WebAPI_Core.Controllers
             }
             else
             {
-                var knownZipCode = await _zipCodesRepository.FindByID(zipCodeInfo.ZipCodeID);
+                var knownZipCodeByID = await _zipCodesRepository.FindByID(zipCodeInfo.ZipCodeID);
 
-                if (knownZipCode == null)
+                if (knownZipCodeByID == null)
                 {
                     return NotFound();
                 }
                 else
                 {
-                    var knowState = await _statesRepository.FindByID(zipCodeInfo.StateID);
-                    if (knowState == null)
+                    var isZipCodeByExists = await _zipCodesRepository.IsEntityExists(zipCodeInfo);
+                    if (isZipCodeByExists)
                     {
-                        return BadRequest("Specified State does not exist.");
+                        return BadRequest("ZipCode with specified value already exists.");
                     }
 
                     var result = await _zipCodesRepository.Update(zipCodeInfo);
@@ -111,6 +116,12 @@ namespace US_Txes_WebAPI_Core.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<ZipCode>> Delete(int id)
         {
+            var associatedFees = await _feesRepository.GetAllEntitiesByParentID(id);
+            if (associatedFees.IsAny())
+            {
+                return Problem("Cannot remove ZipCode with specified id. It contains at least 1 associated Fee.");
+            }
+
             var isDeleted = await _zipCodesRepository.DeleteByID(id);
 
             if (!isDeleted)

@@ -11,12 +11,14 @@ namespace US_Txes_WebAPI_Core.DbModels
 
         public CustomDbContext()
         {
-
         }
 
         public CustomDbContext(DbContextOptions<CustomDbContext> options): base(options)
         {
+        }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
         }
     }
 }

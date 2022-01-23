@@ -2,7 +2,7 @@
 {
     public enum VehicleTypes: byte
     {
-        Passenger = 0 ,
+        Passenger = 0,
         Truck = 1,
         Trailer = 2
     }
