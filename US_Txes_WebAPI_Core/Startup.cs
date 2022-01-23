@@ -1,6 +1,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
+using System.Text;
 using US_Txes_WebAPI_Core.DbModels;
 using US_Txes_WebAPI_Core.DbRepositories;
 using US_Txes_WebAPI_Core.Extensions;
@@ -70,6 +72,20 @@ namespace US_Txes_WebAPI_Core
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+
+                endpoints.MapGet("/", async context =>
+                {
+                    var stringBuilder = new StringBuilder();
+                    stringBuilder.AppendLine($"Available endoints list:");
+                    stringBuilder.AppendLine($"Initialize database: /api/initializer");
+                    stringBuilder.AppendLine($"States - GET/POST/PUT/DELETE: /api/states");
+                    stringBuilder.AppendLine($"ZipCodes - GET/POST/PUT/DELETE: /api/zipcodes");
+                    stringBuilder.AppendLine($"Fees - GET/POST/PUT/DELETE: /api/fees");
+                    stringBuilder.AppendLine($"Vehicle Fees - GET/POST/PUT/DELETE: /api/vehiclefees");
+                    stringBuilder.AppendLine($"Taxes - GET/POST: /api/taxes");
+
+                    await context.Response.WriteAsync(stringBuilder.ToString());
+                });
             });
 
             //Connection custom logger
